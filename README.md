@@ -1,5 +1,11 @@
 # DragOrder
-A light set of helpers for building and manipulating DOM
+A javascript class for managing the order of elements via drag and drop
+
+Inspired by https://archive.codeplex.com/?p=dragsort, this javascript class has no dependencies and is importable via npm.
+
+## FAQ
+#### What about the Drag and Drop API
+Unfortunately, the Drag and Drop API quite limited in what it can do when trying to customize things like the placeholder and the dragging element. This class uses mouse events to mimic similar behavior.
 
 ## Usage
 
