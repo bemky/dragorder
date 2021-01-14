@@ -1,0 +1,26 @@
+{
+  "name": "dragorder",
+  "version": "0.1.0",
+  "description": "A javascript class for managing the order of elements via drag and drop",
+  "main": "dragorder.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bemky/dragorder.git"
+  },
+  "keywords": [
+    "ui",
+    "drag",
+    "drop",
+    "order",
+    "sort"
+  ],
+  "author": "Ben Ehmke",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bemky/dragorder/issues"
+  },
+  "homepage": "https://github.com/bemky/dragorder#readme"
+}
