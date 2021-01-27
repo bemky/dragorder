@@ -1,4 +1,4 @@
-class DragOrder {
+export default class DragOrder {
   
   /*
     Due to limitations with the Drag and Drop API of javascript,
