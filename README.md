@@ -28,6 +28,7 @@ new DragOrder({
 |`dragStart`| Function | Callback when element drag is initiated | `items => {}` |
 |`dragEnd`| Function | Callback when element drag is ended. This is always called, even if drag is canceled (i.e. escape key) | `items => {}` |
 |`placeholder`| HTML or Element or Function | What to render as a placeholder for dragged item | `item => item.cloneNode(true)` |
+|`dragholder`| Function | What to render as the element that is dragged by the mouse | `item => item.cloneNode(true)` |
 |`handleSelector`| String | Selector to scope what element is clickable to initiate drag | `item` |
 |`itemSelector`|String| Selector to scope what elements are draggable | `this.el.children` |
 

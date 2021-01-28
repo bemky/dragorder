@@ -31,8 +31,6 @@ export default class DragOrder {
     itemSelector: false
   }
   
-  items;
-  
   constructor(options){
     this.el = options.el
     
@@ -46,7 +44,6 @@ export default class DragOrder {
     this.mouseUp = this.mouseUp.bind(this)
     this.el.addEventListener('mousedown', this.mouseDown);
     this.el.addEventListener('mouseup', this.mouseUp);
-    this.getItems()
   }
   
   remove () {
@@ -98,7 +95,7 @@ export default class DragOrder {
   dragStart (e) {
     if(this.dragging) return
     this.dragging = true;
-    
+    this.getItems()
     this.selectedItem = this.getItem(e.pageX, e.pageY);
     const itemPosition = this.selectedItem.getBoundingClientRect();
     this.lastPosition = {
