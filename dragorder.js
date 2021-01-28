@@ -10,10 +10,23 @@ export default class DragOrder {
     dragEnd: (items) => {},
     placeholder: (item) => {
       const el = item.cloneNode(true);
-      el.style.display = 'block';
+      el.style.display = item.style.display;
       el.style.opacity = 0.5
       return el
     },
+	dragholder: item => {
+	    const el = item.cloneNode(true);
+	    el.style.display = item.style.display;
+	    el.style.width = item.offsetWidth + "px";
+	    el.style.height = item.offsetHeight + "px";
+	    el.style.minWidth = 'auto';
+	    el.style.maxWidth = 'auto';
+	    el.style.minHeight = 'auto';
+	    el.style.maxHeight = 'auto';
+	    el.style.position = 'fixed';
+	    el.style.cursor = "grabbing";
+		return el
+	},
     handleSelector: false,
     itemSelector: false
   }
@@ -65,8 +78,8 @@ export default class DragOrder {
   mouseMove (e) {
     if(this.moving) return // debounce multiple async calls
     this.moving = true
-    this.dragItem.style.left = e.pageX
-    this.dragItem.style.top = e.pageY
+    this.dragItem.style.left = e.pageX + "px"
+    this.dragItem.style.top = e.pageY + "px"
       
     const hoveredItem = this.getItem(e.pageX, e.pageY)
     if(hoveredItem && this.lastPosition) {
@@ -92,25 +105,14 @@ export default class DragOrder {
       x: e.pageX,
       y: e.pageY
     }
-    
-    // Hide selectedItem
-    this.selectedItem.styleWas = {display: this.selectedItem.style.display};
-    this.selectedItem.style.display = 'none';
-
+	
     // Render dragItem
-    this.dragItem = this.selectedItem.cloneNode(true);
+    this.dragItem = this.options.dragholder(this.selectedItem);
     this.selectedItem.insertAdjacentElement('beforebegin', this.dragItem);
-    this.dragItem.style.display = 'block';
-    this.dragItem.style.width = this.dragItem.offsetWidth;
-    this.dragItem.style.height = this.dragItem.offsetHeight;
-    this.dragItem.style.minWidth = 'auto';
-    this.dragItem.style.maxWidth = 'auto';
-    this.dragItem.style.minHeight = 'auto';
-    this.dragItem.style.maxHeight = 'auto';
-    this.dragItem.style.position = 'fixed';
+    this.dragItem.style.left = e.pageX + "px"
+    this.dragItem.style.top = e.pageY + "px"
     this.dragItem.style.marginTop = itemPosition.top - e.pageY + "px"
     this.dragItem.style.marginLeft = itemPosition.left - e.pageX + "px"
-    this.dragItem.style.cursor = "grabbing"
     
     // Render placeholder
     if(typeof this.options.placeholder == 'string') {
@@ -123,6 +125,10 @@ export default class DragOrder {
       this.placeholder = this.options.placeholder(this.selectedItem)
     }
     this.selectedItem.insertAdjacentElement('beforebegin', this.placeholder)
+	
+    // Hide selectedItem
+    this.selectedItem.styleWas = {display: this.selectedItem.style.display};
+    this.selectedItem.style.display = 'none';
     
     window.addEventListener('mousemove', this.mouseMove);
     window.addEventListener('keyup', this.keyUp);
@@ -131,6 +137,7 @@ export default class DragOrder {
   }
   
   dragEnd () {
+	if(!this.dragging) return;
     Object.keys(this.selectedItem.styleWas).forEach(style => {
       this.selectedItem.style[style] = this.selectedItem.styleWas[style]
     })
