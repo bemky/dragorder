@@ -163,8 +163,14 @@ export default class DragOrder {
   getItem(x, y) {
     let item;
     this.items.forEach(i => {
-      const position = i.getBoundingClientRect();
-      if(position.left <= x && position.right >= x && position.top <= y && position.bottom >= y){
+      const viewportPosition = i.getBoundingClientRect();
+      const position = {
+        left: viewportPosition.left + window.scrollX,
+        right: viewportPosition.right + window.scrollX,
+        top: viewportPosition.top + window.scrollY,
+        bottom: viewportPosition.bottom + window.scrollY
+      }
+      if (position.left <= x && position.right >= x && position.top <= y && position.bottom >= y){
         item = i
       }
     })
