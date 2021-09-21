@@ -25,6 +25,13 @@ export default class DragOrder {
 	    el.style.maxHeight = 'auto';
 	    el.style.position = 'fixed';
 	    el.style.cursor = "grabbing";
+        
+        // Fix bug with table rows squishing width
+        if (el.tagName == "TR") {
+            Array.from(el.children).forEach((child, index) => {
+                child.style.width = item.children[index].offsetWidth + "px"
+            })
+        }
 		return el
 	},
     handleSelector: false,
