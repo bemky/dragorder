@@ -25,6 +25,7 @@ export default class DragOrder {
             el.style.maxHeight = 'auto';
             el.style.position = 'fixed';
             el.style.cursor = "grabbing";
+            el.style.zIndex = 999;
         
             // Fix bug with table rows squishing width
             if (el.tagName == "TR") {
