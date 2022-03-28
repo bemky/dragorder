@@ -1,6 +1,6 @@
 {
   "name": "dragorder",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "A javascript class for managing the order of elements via drag and drop",
   "main": "dragorder.js",
   "scripts": {

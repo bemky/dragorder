@@ -24,8 +24,12 @@ export default class DragOrder {
             el.style.minHeight = 'auto';
             el.style.maxHeight = 'auto';
             el.style.position = 'fixed';
-            el.style.cursor = "grabbing";
             el.style.zIndex = 999;
+            el.style.cursor = "grabbing";
+            
+            if (this.options.handleSelector) {
+                el.querySelector(this.options.handleSelector).style.cursor = "grabbing";
+            }
         
             // Fix bug with table rows squishing width
             if (el.tagName == "TR") {
@@ -81,13 +85,13 @@ export default class DragOrder {
     }
 
     mouseMove (e) {
-        if(this.moving) return // debounce multiple async calls
-            this.moving = true
-            this.dragItem.style.left = e.pageX + "px"
-            this.dragItem.style.top = e.pageY + "px"
+        if (this.moving) return // debounce multiple async calls
+        this.moving = true
+        this.dragItem.style.left = e.pageX + "px"
+        this.dragItem.style.top = e.pageY + "px"
       
-            const hoveredItem = this.getItem(e.pageX, e.pageY)
-        if(hoveredItem && this.lastPosition) {
+        const hoveredItem = this.getItem(e.pageX, e.pageY)
+        if (hoveredItem && this.lastPosition) {
             const position = this.lastPosition.y > e.pageY || this.lastPosition.x > e.pageX ? 'beforebegin' : 'afterend';
             hoveredItem.insertAdjacentElement(position, this.placeholder);
         }
@@ -101,8 +105,8 @@ export default class DragOrder {
     }
   
     dragStart (e) {
-        if(this.dragging) return
-            this.dragging = true;
+        if (this.dragging) return
+        this.dragging = true;
         this.getItems()
         this.selectedItem = this.getItem(e.pageX, e.pageY);
         const itemPosition = this.selectedItem.getBoundingClientRect();
@@ -112,7 +116,7 @@ export default class DragOrder {
         }
 	
         // Render dragItem
-        this.dragItem = this.options.dragholder(this.selectedItem);
+        this.dragItem = this.options.dragholder.call(this, this.selectedItem);
         this.selectedItem.insertAdjacentElement('beforebegin', this.dragItem);
         this.dragItem.style.left = e.pageX + "px"
         this.dragItem.style.top = e.pageY + "px"
@@ -120,7 +124,7 @@ export default class DragOrder {
         this.dragItem.style.marginLeft = itemPosition.left - e.pageX + "px"
     
         // Render placeholder
-        if(typeof this.options.placeholder == 'string') {
+        if (typeof this.options.placeholder == 'string') {
             this.placeholder = document.createElement('div');
             this.placeholder.innerHTML = this.options.placeholder;
             this.placeholder = this.placeholder.children[0];

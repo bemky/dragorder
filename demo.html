@@ -1,16 +1,15 @@
 <html>
 <head>
-    <script type="text/javascript" src="dragorder.js"></script>
-    <script type="text/javascript">
+    <script type="module">
+        import DragOrder from './dragorder.js';
+        
         document.addEventListener('DOMContentLoaded', function(){
             new DragOrder({
-                el: document.getElementById('example'),
+                el: document.getElementById('example-1'),
                 handleSelector: '.handle',
                 itemSelector: '.item',
                 drop: (items) => {
-                    items.forEach((item, i) => {
-                        item.querySelector('span').textContent = i + 1
-                    })
+                    document.getElementById('current-order-1').textContent = Array.from(items).map(x => x.textContent).join(',')
                 }
             })
         })
@@ -28,33 +27,44 @@ body{
 *{
     box-sizing: border-box;
 }
-.example{
-    margin: 3em auto;
-    display: flex;
-    max-width: 300px;
-    flex-wrap: wrap;
+.container {
+    margin: 1em auto;
+    padding: 2em;
 }
-.example > div {
+.example-container {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: top;
+}
+.example-container > * {
+    width: 50%;
+}
+.current {
+    margin-top: 1em;
+}
+.example-1 {
+    display: grid;
+    grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+    gap: 0.5em;
+}
+.example-1 > div {
     border: 1px solid gray;
     background: rgb(240,240,240);
     text-align: center;
-    flex: 1 1 auto;
-    margin: 0.5em;
     padding: 0.5em 0;
-    min-width: calc(33% - 1em);
-}
-.example > div span {
-    color: blue;
 }
 pre {
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-left: 1em;
     display: block;
-    margin: 1em auto;
-    max-width: 300px;
     padding: 1em;
     border-radius: 0.5em;
     border: 1px solid rgb(100,100,100);
     background: rgb(240,240,240);
+    overflow-x: scroll;
 }
+
 .handle{
     cursor: grab;
     border-top: 1px solid rgb(50,50,50);
@@ -64,87 +74,82 @@ pre {
     width: 12px;
     display: inline-block;
 }
+
+.example-2 table {
+    table-layout: fixed;
+    border-collapse: collapse;
+    width: 100%;
+    text-align: center;
+}
+
+.example-2 td, .example-2 th {
+    border: 1px solid gray;
+    padding: 0.5em;
+}
 </style>
 <body>
-    <div id="example">
-        <div class="example">
-            <div class="item">
-                A
-                <div style="font-weight: bold; font-size: 0.6em; color: gray; margin-top: 0.5em">
-                    ORDER: <span>1</span>
+    <div class="container">
+        <h1>
+            Example
+        </h1>
+        <div class="example-container">
+            <div class="">
+                <div class="example-1" id="example-1">
+                    <div class="item">
+                        A<br>
+                        <div class="handle"></div>
+                    </div>
+                    <div class="item">
+                        B<br>
+                        <div class="handle"></div>
+                    </div>
+                    <div class="item">
+                        C<br>
+                        <div class="handle"></div>
+                    </div>
+                    <div class="item">
+                        D<br>
+                        <div class="handle"></div>
+                    </div>
+                    <div class="item">
+                        E<br>
+                        <div class="handle"></div>
+                    </div>
+                    <div class="item">
+                        F<br>
+                        <div class="handle"></div>
+                    </div>
+                    <div class="item">
+                        G<br>
+                        <div class="handle"></div>
+                    </div>
+                    <div class="item">
+                        H<br>
+                        <div class="handle"></div>
+                    </div>
+                    <div class="item">
+                        I<br>
+                        <div class="handle"></div>
+                    </div>
                 </div>
-                <div class="handle"></div>
-            </div>
-            <div class="item">
-                B
-                <div style="font-weight: bold; font-size: 0.6em; color: gray; margin-top: 0.5em">
-                    ORDER: <span>2</span>
+                <div class="current">
+                    <div style="font-weight: bold">Current Order</div>
+                    <div id="current-order-1">A, B, C, D, E, F, G, H, I</div>
                 </div>
-                <div class="handle"></div>
             </div>
-            <div class="item">
-                C
-                <div style="font-weight: bold; font-size: 0.6em; color: gray; margin-top: 0.5em">
-                    ORDER: <span>3</span>
-                </div>
-                <div class="handle"></div>
-            </div>
-            <div class="item">
-                D
-                <div style="font-weight: bold; font-size: 0.6em; color: gray; margin-top: 0.5em">
-                    ORDER: <span>4</span>
-                </div>
-                <div class="handle"></div>
-            </div>
-            <div class="item">
-                E
-                <div style="font-weight: bold; font-size: 0.6em; color: gray; margin-top: 0.5em">
-                    ORDER: <span>5</span>
-                </div>
-                <div class="handle"></div>
-            </div>
-            <div class="item">
-                F
-                <div style="font-weight: bold; font-size: 0.6em; color: gray; margin-top: 0.5em">
-                    ORDER: <span>6</span>
-                </div>
-                <div class="handle"></div>
-            </div>
-            <div class="item">
-                G
-                <div style="font-weight: bold; font-size: 0.6em; color: gray; margin-top: 0.5em">
-                    ORDER: <span>7</span>
-                </div>
-                <div class="handle"></div>
-            </div>
-            <div class="item">
-                H
-                <div style="font-weight: bold; font-size: 0.6em; color: gray; margin-top: 0.5em">
-                    ORDER: <span>8</span>
-                </div>
-                <div class="handle"></div>
-            </div>
-            <div class="item">
-                I
-                <div style="font-weight: bold; font-size: 0.6em; color: gray; margin-top: 0.5em">
-                    ORDER: <span>9</span>
-                </div>
-                <div class="handle"></div>
-            </div>
-        </div>
-    </div>
-    <pre>
-        <code>
-new DragOrder({
+            <pre><code>new DragOrder({
     el: document.getElementById('example'),
     handleSelector: '.handle',
     itemSelector: '.item',
     drop: (items) => {
-        items.forEach((item, i) => {
-            item.querySelector('span').textContent = i + 1
-        })
+        document.getElementById('current-order').textContent = Array.from(items).map(x => x.textContent).join(',')
     }
-})</code>
-    </pre>
+})</code></pre>
+        
+    </div>
+    
+   
+</div>
+
 </body>
 </html>
