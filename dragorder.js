@@ -109,7 +109,7 @@ export default class DragOrder {
         this.dragging = true;
         this.getItems()
         this.selectedItem = this.getItem(e.pageX, e.pageY);
-        const itemPosition = this.selectedItem.getBoundingClientRect();
+        const itemPosition = getBoundingClientRect(this.selectedItem);
         this.lastPosition = {
             x: e.pageX,
             y: e.pageY
@@ -175,7 +175,7 @@ export default class DragOrder {
     getItem(x, y) {
         let item;
         this.items.forEach(i => {
-            const viewportPosition = i.getBoundingClientRect();
+            const viewportPosition = getBoundingClientRect(i);
             const position = {
                 left: viewportPosition.left + window.scrollX,
                 right: viewportPosition.right + window.scrollX,
@@ -194,4 +194,30 @@ export default class DragOrder {
         return this.items
     }
  
+}
+
+function getBoundingClientRect(...els) {
+    if (Array.isArray(els[0]) && els.length == 1) {
+        els = els[0];
+    }
+  
+    if (getComputedStyle(els[0]).display == "contents") {
+        return getBoundingClientRect(...Array.from(els[0].children))
+    }
+
+    let rect = els[0].getBoundingClientRect();
+    rect = {
+        left: rect.left,
+        top: rect.top,
+        right: rect.right,
+        bottom: rect.bottom
+    };
+    els.slice(1).forEach(el => {
+        const thisRect = el.getBoundingClientRect();
+        if (thisRect.left < rect.left) rect.left = thisRect.left;
+        if (thisRect.top < rect.top) rect.top = thisRect.top;
+        if (thisRect.bottom > rect.bottom) rect.bottom = thisRect.bottom;
+        if (thisRect.right > rect.right) rect.right = thisRect.right;
+    });
+    return new DOMRect(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
 }
