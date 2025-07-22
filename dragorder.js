@@ -8,6 +8,7 @@ export default class DragOrder {
         drop: (items) => {},
         dragStart: (items) => {},
         dragEnd: (items) => {},
+        dragMove: (item) => {},
         placeholder: (item) => {
             const el = item.cloneNode(true);
             el.style.display = item.style.display;
@@ -40,7 +41,8 @@ export default class DragOrder {
             return el
         },
         handleSelector: false,
-        itemSelector: false
+        itemSelector: false,
+        parentSelector: false
     }
   
     constructor(options){
@@ -91,9 +93,16 @@ export default class DragOrder {
         this.dragItem.style.top = e.pageY + "px"
       
         const hoveredItem = this.getItem(e.pageX, e.pageY)
-        if (hoveredItem && this.lastPosition) {
+        if (hoveredItem && this.lastPosition && hoveredItem != this.placeholder) {
             const position = this.lastPosition.y > e.pageY || this.lastPosition.x > e.pageX ? 'beforebegin' : 'afterend';
             hoveredItem.insertAdjacentElement(position, this.placeholder);
+            this.options.dragMove(this.placeholder)
+        } else if (!hoveredItem) {
+            const container = this.getContainer(e.pageX, e.pageY)
+            if (container) {
+                container.append(this.placeholder)
+                this.options.dragMove(this.placeholder)
+            }
         }
     
         this.lastPosition = {
@@ -142,7 +151,7 @@ export default class DragOrder {
         window.addEventListener('mousemove', this.mouseMove);
         window.addEventListener('keyup', this.keyUp);
     
-        this.options.dragStart(this.items);
+        this.options.dragStart(this.items, this.selectedItem);
     }
   
     dragEnd () {
@@ -152,7 +161,8 @@ export default class DragOrder {
         })
         this.dragItem.parentNode.removeChild(this.dragItem);
         this.placeholder.parentNode.removeChild(this.placeholder);
-    
+        
+        const selectedItem = this.selectedItem
         delete this.lastPosition;
         delete this.placeholder;
         delete this.dragItem;
@@ -161,7 +171,7 @@ export default class DragOrder {
         window.removeEventListener('mousemove', this.mouseMove);
         window.removeEventListener('keyup', this.keyUp);
     
-        this.options.dragEnd(this.items);
+        this.options.dragEnd(this.items, selectedItem);
     
         this.dragging = false;
     }
@@ -173,25 +183,18 @@ export default class DragOrder {
     }
   
     getItem(x, y) {
-        let item;
-        this.items.forEach(i => {
-            const viewportPosition = getBoundingClientRect(i);
-            const position = {
-                left: viewportPosition.left + window.scrollX,
-                right: viewportPosition.right + window.scrollX,
-                top: viewportPosition.top + window.scrollY,
-                bottom: viewportPosition.bottom + window.scrollY
-            }
-            if (position.left <= x && position.right >= x && position.top <= y && position.bottom >= y){
-                item = i
-            }
-        })
-        return item;
+        const elements = this.el.getRootNode().elementsFromPoint(x, y).reverse().filter(x => x != this.dragItem)
+        return elements.find(el => this.options.itemSelector ? el.matches(this.options.itemSelector) : el.parentElement == this.el)
     }
   
     getItems() {
         this.items = this.options.itemSelector ? this.el.querySelectorAll(this.options.itemSelector) : Array.from(this.el.children)
         return this.items
+    }
+    
+    getContainer (x, y) {
+        const elements = this.el.getRootNode().elementsFromPoint(x, y).reverse()
+        return this.options.parentSelector ? elements.find(el => el.matches(this.options.parentSelector)) : this.el
     }
  
 }

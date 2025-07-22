@@ -31,6 +31,7 @@ new DragOrder({
 |`dragholder`| Function | What to render as the element that is dragged by the mouse | `item => item.cloneNode(true)` |
 |`handleSelector`| String | Selector to scope what element is clickable to initiate drag | `item` |
 |`itemSelector`|String| Selector to scope what elements are draggable | `this.el.children` |
+|`parentSelector`|String| Selector for parents of items, for placing drags not over items | `this.el` |
 
 
 ## Development
