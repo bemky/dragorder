@@ -42,27 +42,36 @@ export default class DragOrder {
         },
         handleSelector: false,
         itemSelector: false,
-        parentSelector: false
+        parentSelector: false,
+        enabled: true
     }
   
     constructor(options){
         this.el = options.el
     
         Object.keys(this.options).forEach(key => {
-            if(options[key]) this.options[key] = options[key]
+            if(options.hasOwnProperty(key)) this.options[key] = options[key]
         })
     
         this.keyUp = this.keyUp.bind(this)
         this.mouseMove = this.mouseMove.bind(this)
         this.mouseDown = this.mouseDown.bind(this)
         this.mouseUp = this.mouseUp.bind(this)
+        if (this.options.enabled) this.enable()
+    }
+    
+    disable () {
+        this.el.removeEventListener('mousedown', this.mouseDown);
+        this.el.removeEventListener('mouseup', this.mouseUp);
+    }
+    
+    enable () {
         this.el.addEventListener('mousedown', this.mouseDown);
         this.el.addEventListener('mouseup', this.mouseUp);
     }
   
     remove () {
-        this.el.removeEventListener('mousedown', this.mouseDown);
-        this.el.removeEventListener('mouseup', this.mouseUp);
+        this.disable()
         this.dragEnd()
     }
   
@@ -92,13 +101,13 @@ export default class DragOrder {
         this.dragItem.style.left = e.pageX + "px"
         this.dragItem.style.top = e.pageY + "px"
       
-        const hoveredItem = this.getItem(e.pageX, e.pageY)
+        const hoveredItem = this.getItem(e.x, e.y)
         if (hoveredItem && this.lastPosition && hoveredItem != this.placeholder) {
             const position = this.lastPosition.y > e.pageY || this.lastPosition.x > e.pageX ? 'beforebegin' : 'afterend';
             hoveredItem.insertAdjacentElement(position, this.placeholder);
             this.options.dragMove(this.placeholder)
         } else if (!hoveredItem) {
-            const container = this.getContainer(e.pageX, e.pageY)
+            const container = this.getContainer(e.x, e.y)
             if (container) {
                 container.append(this.placeholder)
                 this.options.dragMove(this.placeholder)
@@ -117,7 +126,7 @@ export default class DragOrder {
         if (this.dragging) return
         this.dragging = true;
         this.getItems()
-        this.selectedItem = this.getItem(e.pageX, e.pageY);
+        this.selectedItem = this.getItem(e.x, e.y);
         const itemPosition = getBoundingClientRect(this.selectedItem);
         this.lastPosition = {
             x: e.pageX,
@@ -183,7 +192,7 @@ export default class DragOrder {
     }
   
     getItem(x, y) {
-        const elements = this.el.getRootNode().elementsFromPoint(x, y).reverse().filter(x => x != this.dragItem)
+        const elements = this.el.getRootNode().elementsFromPoint(x, y).reverse().filter(el => el != this.dragItem)
         return elements.find(el => this.options.itemSelector ? el.matches(this.options.itemSelector) : el.parentElement == this.el)
     }
   
