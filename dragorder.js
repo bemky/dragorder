@@ -9,14 +9,14 @@ export default class DragOrder {
         dragStart: (items) => {},
         dragEnd: (items) => {},
         dragMove: (item) => {},
-        placeholder: (item) => {
-            const el = item.cloneNode(true);
+        placeholder: function (item) {
+            const el = this.constructor.cloneNode(item);
             el.style.display = item.style.display;
             el.style.opacity = 0.5
             return el
         },
-        dragholder: item => {
-            const el = item.cloneNode(true);
+        dragholder: function (item) {
+            const el = this.constructor.cloneNode(item);
             el.style.display = item.style.display;
             el.style.width = item.offsetWidth + "px";
             el.style.height = item.offsetHeight + "px";
@@ -44,6 +44,10 @@ export default class DragOrder {
         itemSelector: false,
         parentSelector: false,
         enabled: true
+    }
+    
+    static cloneNode (node) {
+        return node.cloneNode(true)
     }
   
     constructor(options){
@@ -149,7 +153,7 @@ export default class DragOrder {
         } else if (this.options.placeholder instanceof Element) {
             this.placeholder = this.options.placeholder
         } else if (typeof this.options.placeholder == "function") {
-            this.placeholder = this.options.placeholder(this.selectedItem)
+            this.placeholder = this.options.placeholder.call(this, this.selectedItem)
         }
         this.selectedItem.insertAdjacentElement('beforebegin', this.placeholder)
 	
