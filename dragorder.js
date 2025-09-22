@@ -114,7 +114,7 @@ export default class DragOrder {
             this.options.dragMove(this.placeholder)
         } else if (!hoveredItem) {
             const container = this.getContainer(e.x, e.y)
-            if (container) {
+            if (container && this.el.contains(container) || (this.options.foreignDropSelector && container.closest(this.options.foreignDropSelector))) {
                 container.append(this.placeholder)
                 this.options.dragMove(this.placeholder)
             }
@@ -205,14 +205,12 @@ export default class DragOrder {
     dispatchDrop () {
         this.options.drop(this.getItems());
     }
-    
-    
   
     getItem(x, y) {
         const elements = this.el.getRootNode().elementsFromPoint(x, y).reverse().filter(el => el != this.dragItem)
         let item = elements.find(el => this.options.itemSelector ? el.matches(this.options.itemSelector) : el.parentElement == this.el)
         if (item && !this.el.contains(item)) {
-            if (!this.options.foreignDropSelector || !item.closest(this.options.foreignDropSelector)) {
+            if (this.options.foreignDropSelector == false || !item.closest(this.options.foreignDropSelector)) {
                 item = undefined
             }
         }
