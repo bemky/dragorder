@@ -32,6 +32,7 @@ new DragOrder({
 |`handleSelector`| String | Selector to scope what element is clickable to initiate drag | `item` |
 |`itemSelector`|String| Selector to scope what elements are draggable | `this.el.children` |
 |`parentSelector`|String| Selector for parents of items, for placing drags not over items | `this.el` |
+|`foreignDropSelector`|String| Selector for where items are droppable outside DragOrder target, helpful to use with other DragOrder instances | `this.el` |
 
 
 ## Development

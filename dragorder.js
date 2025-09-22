@@ -43,6 +43,7 @@ export default class DragOrder {
         handleSelector: false,
         itemSelector: false,
         parentSelector: false,
+        foreignDropSelector: false,
         enabled: true
     }
     
@@ -52,9 +53,10 @@ export default class DragOrder {
   
     constructor(options){
         this.el = options.el
+        this.el.dragorder = this
     
         Object.keys(this.options).forEach(key => {
-            if(options.hasOwnProperty(key)) this.options[key] = options[key]
+            if (options.hasOwnProperty(key)) this.options[key] = options[key]
         })
     
         this.keyUp = this.keyUp.bind(this)
@@ -191,13 +193,31 @@ export default class DragOrder {
   
     drop () {
         this.placeholder.insertAdjacentElement('beforebegin', this.selectedItem);
+        let foreignDropTarget
+        if (!this.el.contains(this.selectedItem)) {
+            foreignDropTarget = this.selectedItem.closest(this.options.foreignDropSelector)
+        }
         this.dragEnd();
+        this.dispatchDrop()
+        if (foreignDropTarget) foreignDropTarget.dragorder.dispatchDrop()
+    }
+    
+    dispatchDrop () {
         this.options.drop(this.getItems());
     }
+    
+    
   
     getItem(x, y) {
         const elements = this.el.getRootNode().elementsFromPoint(x, y).reverse().filter(el => el != this.dragItem)
-        return elements.find(el => this.options.itemSelector ? el.matches(this.options.itemSelector) : el.parentElement == this.el)
+        let item = elements.find(el => this.options.itemSelector ? el.matches(this.options.itemSelector) : el.parentElement == this.el)
+        if (item && !this.el.contains(item)) {
+            if (!this.options.foreignDropSelector || !item.closest(this.options.foreignDropSelector)) {
+                item = undefined
+            }
+        }
+        
+        return item 
     }
   
     getItems() {

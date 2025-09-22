@@ -12,6 +12,16 @@
                     document.getElementById('current-order-1').textContent = Array.from(items).map(x => x.textContent).join(',')
                 }
             })
+            
+            new DragOrder({
+                el: document.getElementById('example-2'),
+                handleSelector: '.handle',
+                itemSelector: '.item',
+                foreignDropSelector: '#example-1',
+                drop: (items) => {
+                    document.getElementById('current-order-2').textContent = Array.from(items).map(x => x.textContent).join(',')
+                }
+            })
         })
     </script>
 </head>
@@ -42,12 +52,12 @@ body{
 .current {
     margin-top: 1em;
 }
-.example-1 {
+.example {
     display: grid;
     grid-template: repeat(3, 1fr) / repeat(3, 1fr);
     gap: 0.5em;
 }
-.example-1 > div {
+.example > div {
     border: 1px solid gray;
     background: rgb(240,240,240);
     text-align: center;
@@ -74,18 +84,6 @@ pre {
     width: 12px;
     display: inline-block;
 }
-
-.example-2 table {
-    table-layout: fixed;
-    border-collapse: collapse;
-    width: 100%;
-    text-align: center;
-}
-
-.example-2 td, .example-2 th {
-    border: 1px solid gray;
-    padding: 0.5em;
-}
 </style>
 <body>
     <div class="container">
@@ -94,7 +92,7 @@ pre {
         </h1>
         <div class="example-container">
             <div class="">
-                <div class="example-1" id="example-1">
+                <div class="example" id="example-1">
                     <div class="item">
                         A<br>
                         <div class="handle"></div>
@@ -138,18 +136,78 @@ pre {
                 </div>
             </div>
             <pre><code>new DragOrder({
-    el: document.getElementById('example'),
-    handleSelector: '.handle',
-    itemSelector: '.item',
-    drop: (items) => {
-        document.getElementById('current-order').textContent = Array.from(items).map(x => x.textContent).join(',')
-    }
-})</code></pre>
+                el: document.getElementById('example'),
+                handleSelector: '.handle',
+                itemSelector: '.item',
+                drop: (items) => {
+                    document.getElementById('current-order').textContent = Array.from(items).map(x => x.textContent).join(',')
+                }
+            })</code></pre>
         
+        </div>
     </div>
     
-   
-</div>
+    <div class="container">
+        <h1>
+            Example 2
+        </h1>
+        <div class="example-container">
+            <div class="">
+                <div class="example" id="example-2">
+                    <div class="item">
+                        A<br>
+                        <div class="handle"></div>
+                    </div>
+                    <div class="item">
+                        B<br>
+                        <div class="handle"></div>
+                    </div>
+                    <div class="item">
+                        C<br>
+                        <div class="handle"></div>
+                    </div>
+                    <div class="item">
+                        D<br>
+                        <div class="handle"></div>
+                    </div>
+                    <div class="item">
+                        E<br>
+                        <div class="handle"></div>
+                    </div>
+                    <div class="item">
+                        F<br>
+                        <div class="handle"></div>
+                    </div>
+                    <div class="item">
+                        G<br>
+                        <div class="handle"></div>
+                    </div>
+                    <div class="item">
+                        H<br>
+                        <div class="handle"></div>
+                    </div>
+                    <div class="item">
+                        I<br>
+                        <div class="handle"></div>
+                    </div>
+                </div>
+                <div class="current">
+                    <div style="font-weight: bold">Current Order</div>
+                    <div id="current-order-2">A, B, C, D, E, F, G, H, I</div>
+                </div>
+            </div>
+            <pre><code>new DragOrder({
+                el: document.getElementById('example'),
+                handleSelector: '.handle',
+                itemSelector: '.item',
+                foreignDropSelector: '#example-1',
+                drop: (items) => {
+                    document.getElementById('current-order').textContent = Array.from(items).map(x => x.textContent).join(',')
+                }
+            })</code></pre>
+        
+        </div>
+    </div>
 
 </body>
 </html>
