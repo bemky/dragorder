@@ -141,11 +141,11 @@ export default class DragOrder {
 	
         // Render dragItem
         this.dragItem = this.options.dragholder.call(this, this.selectedItem);
-        this.selectedItem.insertAdjacentElement('beforebegin', this.dragItem);
         this.dragItem.style.left = e.pageX + "px"
         this.dragItem.style.top = e.pageY + "px"
         this.dragItem.style.marginTop = itemPosition.top - e.pageY + "px"
         this.dragItem.style.marginLeft = itemPosition.left - e.pageX + "px"
+        this.el.append(this.dragItem)
     
         // Render placeholder
         if (typeof this.options.placeholder == 'string') {
@@ -157,11 +157,7 @@ export default class DragOrder {
         } else if (typeof this.options.placeholder == "function") {
             this.placeholder = this.options.placeholder.call(this, this.selectedItem)
         }
-        this.selectedItem.insertAdjacentElement('beforebegin', this.placeholder)
-	
-        // Hide selectedItem
-        this.selectedItem.styleWas = {display: this.selectedItem.style.display};
-        this.selectedItem.style.display = 'none';
+        this.selectedItem.replaceWith(this.placeholder)
     
         window.addEventListener('mousemove', this.mouseMove);
         window.addEventListener('keyup', this.keyUp);
@@ -171,12 +167,9 @@ export default class DragOrder {
   
     dragEnd () {
         if(!this.dragging) return;
-        Object.keys(this.selectedItem.styleWas).forEach(style => {
-            this.selectedItem.style[style] = this.selectedItem.styleWas[style]
-        })
-        this.dragItem.parentNode.removeChild(this.dragItem);
-        this.placeholder.parentNode.removeChild(this.placeholder);
-        
+        this.placeholder.replaceWith(this.selectedItem)
+        this.dragItem.remove();
+
         const selectedItem = this.selectedItem
         delete this.lastPosition;
         delete this.placeholder;
