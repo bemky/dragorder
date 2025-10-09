@@ -5,10 +5,12 @@ export default class DragOrder {
     this uses mouseover to manage the dragging and placement of an item
     */
     options = {
-        drop: (items) => {},
         dragStart: (items) => {},
-        dragEnd: (items) => {},
+        dragEnter: (items) => {},
         dragMove: (item) => {},
+        drop: (items, item) => {},
+        dragEnd: (items) => {},
+        dragLeave: (items) => {},
         placeholder: function (item) {
             const el = this.constructor.cloneNode(item);
             el.style.display = item.style.display;
@@ -59,7 +61,7 @@ export default class DragOrder {
             if (options.hasOwnProperty(key)) this.options[key] = options[key]
         })
     
-        this.keyUp = this.keyUp.bind(this)
+        this.checkCancel = this.checkCancel.bind(this)
         this.mouseMove = this.mouseMove.bind(this)
         this.mouseDown = this.mouseDown.bind(this)
         this.mouseUp = this.mouseUp.bind(this)
@@ -67,38 +69,35 @@ export default class DragOrder {
     }
     
     disable () {
-        this.el.removeEventListener('mousedown', this.mouseDown);
-        this.el.removeEventListener('mouseup', this.mouseUp);
+        this.el.removeEventListener('pointerdown', this.mouseDown);
     }
     
     enable () {
-        this.el.addEventListener('mousedown', this.mouseDown);
-        this.el.addEventListener('mouseup', this.mouseUp);
+        this.el.addEventListener('pointerdown', this.mouseDown);
     }
   
     remove () {
         this.disable()
-        this.dragEnd()
+        this.dragLeave()
     }
   
-    keyUp (e) {
+    checkCancel (e) {
         if(e.key == "Escape" && this.selectedItem !== undefined) {
-            this.dragEnd();
+            this.dragCancel();
         }
-    }
-  
-    mouseUp (e) {
-        if(this.dragging) this.drop();
     }
   
     mouseDown (e) {
-        if(this.options.handleSelector) {
+        e.target.setPointerCapture(e.pointerId)
+        if (this.options.handleSelector) {
             const matchingEl = e.target.matches(this.options.handleSelector) || e.target.closest(this.options.handleSelector)
-            if(!matchingEl) { 
+            if (!matchingEl) { 
                 return
             }
         }
+        e.preventDefault()
         this.dragStart(e);
+        return false
     }
 
     mouseMove (e) {
@@ -108,15 +107,26 @@ export default class DragOrder {
         this.dragItem.style.top = e.pageY + "px"
       
         const hoveredItem = this.getItem(e.x, e.y)
-        if (hoveredItem && this.lastPosition && hoveredItem != this.placeholder) {
+        if (hoveredItem && this.lastPosition && hoveredItem != this.placeholderItem) {
             const position = this.lastPosition.y > e.pageY || this.lastPosition.x > e.pageX ? 'beforebegin' : 'afterend';
-            hoveredItem.insertAdjacentElement(position, this.placeholder);
-            this.options.dragMove(this.placeholder)
+            hoveredItem.insertAdjacentElement(position, this.placeholderItem);
+            this.options.dragMove(this.placeholderItem)
         } else if (!hoveredItem) {
             const container = this.getContainer(e.x, e.y)
-            if (container && this.el.contains(container) || (this.options.foreignDropSelector && container.closest(this.options.foreignDropSelector))) {
-                container.append(this.placeholder)
-                this.options.dragMove(this.placeholder)
+            if (container) {
+                let foreignDragOrder
+                if (this.options.foreignDropSelector) {
+                    foreignDragOrder = container.closest(this.options.foreignDropSelector)
+                }
+                // Transfer to foreign DragOrder
+                if (foreignDragOrder && foreignDragOrder != this.el) {
+                    this.placeholderItem.remove()
+                    foreignDragOrder.dragorder.dragEnter(this.selectedItem, this.dragItem, this.placeholderItem)
+                    this.dragLeave()
+                } else if (this.el.contains(container)) {
+                    container.append(this.placeholderItem)
+                    this.options.dragMove(this.placeholderItem)
+                }
             }
         }
     
@@ -128,75 +138,103 @@ export default class DragOrder {
         this.moving = false;
     }
   
-    dragStart (e) {
+    mouseUp (e) {
+        if (this.dragging) this.drop();
+    }
+    
+    dragEnter (selectedItem, dragItem, placeholderItem) {
         if (this.dragging) return
         this.dragging = true;
         this.getItems()
-        this.selectedItem = this.getItem(e.x, e.y);
-        const itemPosition = getBoundingClientRect(this.selectedItem);
+        this.selectedItem = selectedItem
+        this.dragItem = dragItem
+        this.placeholderItem = placeholderItem
+        
+        this.el.append(this.dragItem)
+        
+        this.options.dragEnter();
+        window.addEventListener('pointermove', this.mouseMove);
+        window.addEventListener('pointerup', this.mouseUp);
+        window.addEventListener('keyup', this.checkCancel);
+    }
+    
+    dragLeave () {
+        window.removeEventListener('pointermove', this.mouseMove);
+        window.removeEventListener('pointerup', this.mouseUp);
+        window.removeEventListener('keyup', this.checkCancel);
+
+        delete this.lastPosition;
+        delete this.placeholderItem;
+        delete this.dragItem;
+        delete this.selectedItem;
+        
+        this.options.dragLeave();
+        this.dragging = false;
+    }
+  
+    dragStart (e) {
+        const selectedItem = this.getItem(e.x, e.y);
+        const itemPosition = getBoundingClientRect(selectedItem);
         this.lastPosition = {
             x: e.pageX,
             y: e.pageY
         }
-	
-        // Render dragItem
-        this.dragItem = this.options.dragholder.call(this, this.selectedItem);
-        this.dragItem.style.left = e.pageX + "px"
-        this.dragItem.style.top = e.pageY + "px"
-        this.dragItem.style.marginTop = itemPosition.top - e.pageY + "px"
-        this.dragItem.style.marginLeft = itemPosition.left - e.pageX + "px"
-        this.el.append(this.dragItem)
-    
-        // Render placeholder
-        if (typeof this.options.placeholder == 'string') {
-            this.placeholder = document.createElement('div');
-            this.placeholder.innerHTML = this.options.placeholder;
-            this.placeholder = this.placeholder.children[0];
-        } else if (this.options.placeholder instanceof Element) {
-            this.placeholder = this.options.placeholder
-        } else if (typeof this.options.placeholder == "function") {
-            this.placeholder = this.options.placeholder.call(this, this.selectedItem)
-        }
-        this.selectedItem.replaceWith(this.placeholder)
-    
-        window.addEventListener('mousemove', this.mouseMove);
-        window.addEventListener('keyup', this.keyUp);
-    
-        this.options.dragStart(this.items, this.selectedItem);
-    }
-  
-    dragEnd () {
-        if(!this.dragging) return;
-        this.placeholder.replaceWith(this.selectedItem)
-        this.dragItem.remove();
 
-        const selectedItem = this.selectedItem
-        delete this.lastPosition;
-        delete this.placeholder;
-        delete this.dragItem;
-        delete this.selectedItem;
+        // Render dragItem
+        const dragItem = this.options.dragholder.call(this, selectedItem);
+        dragItem.style.left = e.pageX + "px"
+        dragItem.style.top = e.pageY + "px"
+        dragItem.style.marginTop = itemPosition.top - e.pageY + "px"
+        dragItem.style.marginLeft = itemPosition.left - e.pageX + "px"
+
+
+        // Render placeholder
+        let placeholderItem
+        if (typeof this.options.placeholder == 'string') {
+            placeholderItem = document.createElement('div');
+            placeholderItem.innerHTML = this.options.placeholder;
+            placeholderItem = placeholderItem.children[0];
+        } else if (this.options.placeholder instanceof Element) {
+            placeholderItem = this.options.placeholder
+        } else if (typeof this.options.placeholder == "function") {
+            placeholderItem = this.options.placeholder.call(this, selectedItem)
+        }
+        selectedItem.replaceWith(placeholderItem)
+
+
+        selectedItem.origin = document.createTextNode("")
+        placeholderItem.parentElement.insertBefore(selectedItem.origin, placeholderItem)
+        selectedItem.dragEnd = () => {
+            selectedItem.origin.remove()
+            delete selectedItem.origin
+            delete selectedItem.dragEnd
+            e.target.releasePointerCapture(e.pointerId)
+        }
+
+        this.dragEnter(selectedItem, dragItem, placeholderItem)
+        this.options.dragStart(this.items, selectedItem);
+        // Needs to be after whatever happens in this.options.dragStart (in case dom changes)
+        this.el.setPointerCapture(e.pointerId)
+    }
     
-        window.removeEventListener('mousemove', this.mouseMove);
-        window.removeEventListener('keyup', this.keyUp);
-    
-        this.options.dragEnd(this.items, selectedItem);
-    
-        this.dragging = false;
+    dragCancel () {
+        this.selectedItem.origin.replaceWith(this.selectedItem)
+        this.dragEnd()
     }
   
     drop () {
-        this.placeholder.insertAdjacentElement('beforebegin', this.selectedItem);
-        let foreignDropTarget
-        if (!this.el.contains(this.selectedItem)) {
-            foreignDropTarget = this.selectedItem.closest(this.options.foreignDropSelector)
-        }
+        const item = this.selectedItem
+        this.placeholderItem.replaceWith(this.selectedItem)
         this.dragEnd();
-        this.dispatchDrop()
-        if (foreignDropTarget) foreignDropTarget.dragorder.dispatchDrop()
+        this.options.drop(this.getItems(), item);
     }
     
-    dispatchDrop () {
-        this.options.drop(this.getItems());
+    dragEnd () {
+        const selectedItem = this.selectedItem
+        this.dragItem.remove()
+        this.dragLeave()
+        this.options.dragEnd(this.items, selectedItem)
+        selectedItem.dragEnd()
     }
   
     getItem(x, y) {
@@ -223,6 +261,7 @@ export default class DragOrder {
  
 }
 
+// Helper function for dealing with elements that where display=contents
 function getBoundingClientRect(...els) {
     if (Array.isArray(els[0]) && els.length == 1) {
         els = els[0];
