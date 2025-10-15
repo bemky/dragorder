@@ -103,12 +103,12 @@ export default class DragOrder {
     mouseMove (e) {
         if (this.moving) return // debounce multiple async calls
         this.moving = true
-        this.dragItem.style.left = e.pageX + "px"
-        this.dragItem.style.top = e.pageY + "px"
+        this.dragItem.style.left = e.x + "px"
+        this.dragItem.style.top = e.y + "px"
       
         const hoveredItem = this.getItem(e.x, e.y)
         if (hoveredItem && this.lastPosition && hoveredItem != this.placeholderItem) {
-            const position = this.lastPosition.y > e.pageY || this.lastPosition.x > e.pageX ? 'beforebegin' : 'afterend';
+            const position = this.lastPosition.y > e.y || this.lastPosition.x > e.x ? 'beforebegin' : 'afterend';
             hoveredItem.insertAdjacentElement(position, this.placeholderItem);
             this.options.dragMove(this.placeholderItem)
         } else if (!hoveredItem) {
@@ -130,10 +130,7 @@ export default class DragOrder {
             }
         }
     
-        this.lastPosition = {
-            x: e.pageX,
-            y: e.pageY
-        }
+        this.lastPosition = e
     
         this.moving = false;
     }
@@ -175,17 +172,14 @@ export default class DragOrder {
     dragStart (e) {
         const selectedItem = this.getItem(e.x, e.y);
         const itemPosition = getBoundingClientRect(selectedItem);
-        this.lastPosition = {
-            x: e.pageX,
-            y: e.pageY
-        }
+        this.lastPosition = e
 
         // Render dragItem
         const dragItem = this.options.dragholder.call(this, selectedItem);
-        dragItem.style.left = e.pageX + "px"
-        dragItem.style.top = e.pageY + "px"
-        dragItem.style.marginTop = itemPosition.top - e.pageY + "px"
-        dragItem.style.marginLeft = itemPosition.left - e.pageX + "px"
+        dragItem.style.left = e.x + "px"
+        dragItem.style.top = e.y + "px"
+        dragItem.style.marginTop = itemPosition.top - e.y + "px"
+        dragItem.style.marginLeft = itemPosition.left - e.x + "px"
 
 
         // Render placeholder
