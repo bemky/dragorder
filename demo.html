@@ -22,6 +22,15 @@
                     document.getElementById('current-order-2').textContent = Array.from(items).map(x => x.textContent).join(',')
                 }
             })
+
+            new DragOrder({
+                el: document.getElementById('example-3'),
+                handleSelector: '.handle',
+                itemSelector: 'tr',
+                drop: (items) => {
+                    document.getElementById('current-order-3').textContent = Array.from(items).map(x => x.querySelector('td').textContent.trim()).join(',')
+                }
+            })
         })
     </script>
 </head>
@@ -83,6 +92,19 @@ pre {
     height: 4px;
     width: 12px;
     display: inline-block;
+}
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+table td {
+    border: 1px solid gray;
+    background: rgb(240,240,240);
+    padding: 0.5em;
+}
+table .handle {
+    margin-top: 0;
+    vertical-align: middle;
 }
 </style>
 <body>
@@ -205,7 +227,59 @@ pre {
                     document.getElementById('current-order').textContent = Array.from(items).map(x => x.textContent).join(',')
                 }
             })</code></pre>
-        
+
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>
+            Example 3 (Table)
+        </h1>
+        <div class="example-container">
+            <div class="">
+                <table id="example-3">
+                    <tbody>
+                        <tr>
+                            <td>A</td>
+                            <td>Apple</td>
+                            <td><div class="handle"></div></td>
+                        </tr>
+                        <tr>
+                            <td>B</td>
+                            <td>Banana</td>
+                            <td><div class="handle"></div></td>
+                        </tr>
+                        <tr>
+                            <td>C</td>
+                            <td>Cherry</td>
+                            <td><div class="handle"></div></td>
+                        </tr>
+                        <tr>
+                            <td>D</td>
+                            <td>Date</td>
+                            <td><div class="handle"></div></td>
+                        </tr>
+                        <tr>
+                            <td>E</td>
+                            <td>Elderberry</td>
+                            <td><div class="handle"></div></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="current">
+                    <div style="font-weight: bold">Current Order</div>
+                    <div id="current-order-3">A, B, C, D, E</div>
+                </div>
+            </div>
+            <pre><code>new DragOrder({
+                el: document.getElementById('example'),
+                handleSelector: '.handle',
+                itemSelector: 'tr',
+                drop: (items) => {
+                    document.getElementById('current-order').textContent = Array.from(items).map(x => x.querySelector('td').textContent.trim()).join(',')
+                }
+            })</code></pre>
+
         </div>
     </div>
 
