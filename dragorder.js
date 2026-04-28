@@ -232,15 +232,26 @@ export default class DragOrder {
     }
   
     getItem(x, y) {
-        const elements = this.el.getRootNode().elementsFromPoint(x, y).reverse().filter(el => el != this.dragItem)
-        let item = elements.find(el => this.options.itemSelector ? el.matches(this.options.itemSelector) : el.parentElement == this.el)
+        const elements = this.el.getRootNode().elementsFromPoint(x, y).reverse().filter(el => el != this.dragItem && !this.dragItem?.contains(el))
+        let item
+        if (this.options.itemSelector) {
+            for (const el of elements) {
+                const match = el.matches(this.options.itemSelector) ? el : el.closest(this.options.itemSelector)
+                if (match) {
+                    item = match
+                    break
+                }
+            }
+        } else {
+            item = elements.find(el => el.parentElement == this.el)
+        }
         if (item && !this.el.contains(item)) {
             if (this.options.foreignDropSelector == false || !item.closest(this.options.foreignDropSelector)) {
                 item = undefined
             }
         }
-        
-        return item 
+
+        return item
     }
   
     getItems() {
