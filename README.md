@@ -1,4 +1,4 @@
-# DragOrder
+<img src="https://raw.githubusercontent.com/bemky/dragorder/master/dragorder.svg" width="300" alt="DRAGORDER">
 A javascript class for managing the order of elements via drag and drop
 
 Inspired by https://archive.codeplex.com/?p=dragsort, this javascript class has no dependencies and is importable via npm.
