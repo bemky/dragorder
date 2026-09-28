@@ -103,9 +103,8 @@ export default class DragOrder {
     mouseMove (e) {
         if (this.moving) return // debounce multiple async calls
         this.moving = true
-        this.dragItem.style.left = e.x + "px"
-        this.dragItem.style.top = e.y + "px"
-      
+        this.positionDragItem(e)
+
         const hoveredItem = this.getItem(e.x, e.y)
         if (hoveredItem && this.lastPosition && hoveredItem != this.placeholderItem) {
             const position = this.lastPosition.y > e.y || this.lastPosition.x > e.x ? 'beforebegin' : 'afterend';
@@ -121,7 +120,7 @@ export default class DragOrder {
                 // Transfer to foreign DragOrder
                 if (foreignDragOrder && foreignDragOrder != this.el) {
                     this.placeholderItem.remove()
-                    foreignDragOrder.dragorder.dragEnter(this.selectedItem, this.dragItem, this.placeholderItem)
+                    foreignDragOrder.dragorder.dragEnter(this.selectedItem, this.dragItem, this.placeholderItem, e)
                     this.dragLeave()
                 } else if (this.el.contains(container)) {
                     container.append(this.placeholderItem)
@@ -129,26 +128,38 @@ export default class DragOrder {
                 }
             }
         }
-    
+
         this.lastPosition = e
-    
+
         this.moving = false;
+    }
+
+    // position:fixed is relative to the viewport unless an ancestor establishes
+    // a containing block for fixed elements (e.g. has a transform). offsetParent
+    // reports that ancestor for fixed elements (or null when there isn't one),
+    // so we use it to correct left/top back to true viewport coordinates.
+    positionDragItem (e) {
+        const offsetParent = this.dragItem.offsetParent;
+        const offset = offsetParent ? offsetParent.getBoundingClientRect() : { left: 0, top: 0 };
+        this.dragItem.style.left = (e.x - offset.left) + "px"
+        this.dragItem.style.top = (e.y - offset.top) + "px"
     }
   
     mouseUp (e) {
         if (this.dragging) this.drop();
     }
     
-    dragEnter (selectedItem, dragItem, placeholderItem) {
+    dragEnter (selectedItem, dragItem, placeholderItem, e) {
         if (this.dragging) return
         this.dragging = true;
         this.getItems()
         this.selectedItem = selectedItem
         this.dragItem = dragItem
         this.placeholderItem = placeholderItem
-        
+
         this.el.append(this.dragItem)
-        
+        if (e) this.positionDragItem(e)
+
         this.options.dragEnter();
         window.addEventListener('pointermove', this.mouseMove);
         window.addEventListener('pointerup', this.mouseUp);
@@ -176,8 +187,6 @@ export default class DragOrder {
 
         // Render dragItem
         const dragItem = this.options.dragholder.call(this, selectedItem);
-        dragItem.style.left = e.x + "px"
-        dragItem.style.top = e.y + "px"
         dragItem.style.marginTop = itemPosition.top - e.y + "px"
         dragItem.style.marginLeft = itemPosition.left - e.x + "px"
 
@@ -205,7 +214,7 @@ export default class DragOrder {
             e.target.releasePointerCapture(e.pointerId)
         }
 
-        this.dragEnter(selectedItem, dragItem, placeholderItem)
+        this.dragEnter(selectedItem, dragItem, placeholderItem, e)
         this.options.dragStart(this.items, selectedItem);
         // Needs to be after whatever happens in this.options.dragStart (in case dom changes)
         this.el.setPointerCapture(e.pointerId)
